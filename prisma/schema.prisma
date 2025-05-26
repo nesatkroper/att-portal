@@ -1,0 +1,245 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generator/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Attendance {
+  attendanceId String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId   String      @db.Uuid
+  eventId      String      @db.Uuid
+  datetime     DateTime    @default(now())
+  method       ScanMethod? @default(phone)
+  status       Status      @default(active)
+  checkIn      DateTime    @default(now())
+  checkOut     DateTime?
+  note         String?     @db.Text
+  createdAt    DateTime    @default(now())
+  employee     Employee    @relation(fields: [employeeId], references: [employeeId])
+  event        Event       @relation(fields: [eventId], references: [eventId])
+
+  @@index([employeeId])
+  @@index([eventId])
+}
+
+model Auth {
+  authId       String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String         @unique @db.VarChar(50)
+  password     String         @db.VarChar(255)
+  roleId       String         @db.Uuid
+  employeeId   String?        @unique @db.Uuid
+  status       AccountStatus  @default(active)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  lastLoginAt  DateTime?
+  token        Token[]
+  logs         AuthLog[]
+  notification Notification[]
+  role         Role           @relation(fields: [roleId], references: [roleId])
+  employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Employee {
+  employeeId     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeCode   String?        @unique @db.VarChar(20)
+  firstName      String         @db.VarChar(20)
+  lastName       String         @db.VarChar(20)
+  gender         Gender         @default(male)
+  dob            DateTime?
+  phone          String?        @unique @db.VarChar(20)
+  positionId     String         @db.Uuid
+  departmentId   String         @db.Uuid
+  salary         Decimal        @db.Decimal(10, 2)
+  hiredDate      DateTime?
+  status         Status         @default(active)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  address        Address?
+  attendances    Attendance[]
+  auth           Auth?
+  customer       Customer[]
+  department     Department     @relation(fields: [departmentId], references: [departmentId])
+  position       Position       @relation(fields: [positionId], references: [positionId])
+  info           Employeeinfo?
+  approvedLeaves LeaveRequest[] @relation("Approver")
+  leaveRequests  LeaveRequest[] @relation("Requester")
+
+  @@index([employeeCode])
+  @@index([departmentId])
+  @@index([positionId])
+}
+
+model Event {
+  eventId    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventName  String       @db.VarChar(200)
+  memo       String?      @db.Text
+  startDate  DateTime
+  endDate    DateTime
+  status     Status       @default(active)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  address    Address?
+  attendance Attendance[]
+  qrCode     QRCode[]
+}
+
+model QRCode {
+  qrId        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token       String   @unique
+  eventId     String   @db.Uuid
+  event       Event    @relation(fields: [eventId], references: [eventId])
+  eventName   String
+  qrCode      String
+  expiresAt   DateTime
+  oneTimeUse  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  scans       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId])
+}
+
+model LeaveRequest {
+  leaveId      String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId   String      @db.Uuid
+  leaveType    LeaveType
+  startDate    DateTime
+  endDate      DateTime
+  reason       String?     @db.Text
+  status       LeaveStatus @default(pending)
+  approvedById String?     @db.Uuid
+  approvedAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  approvedBy   Employee?   @relation("Approver", fields: [approvedById], references: [employeeId])
+  employee     Employee    @relation("Requester", fields: [employeeId], references: [employeeId])
+
+  @@index([employeeId])
+  @@index([status])
+}
+
+
+model Role {
+  roleId   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roleName String @unique @db.VarChar(50)
+  auths    Auth[]
+}
+
+model Department {
+  departmentId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  departmentName String     @unique @db.VarChar(100)
+  description    String?    @db.Text
+  status         Status     @default(active)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  employees      Employee[]
+}
+
+model Position {
+  positionId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  positionName String     @unique @db.VarChar(100)
+  description  String?    @db.Text
+  status       Status     @default(active)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  employees    Employee[]
+}
+
+model Address {
+  addressId  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  street     String?   @db.VarChar(255)
+  city       String?   @db.VarChar(100)
+  state      String?   @db.VarChar(100)
+  zipCode    String?   @db.VarChar(20)
+  country    String?   @db.VarChar(100)
+  employeeId String?   @unique @db.Uuid
+  eventId    String?   @unique @db.Uuid
+  employee   Employee? @relation(fields: [employeeId], references: [employeeId])
+  event      Event?    @relation(fields: [eventId], references: [eventId])
+}
+
+model Token {
+  tokenId String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authId  String @db.Uuid
+  auth    Auth   @relation(fields: [authId], references: [authId])
+}
+
+model AuthLog {
+  logId  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authId String @db.Uuid
+  auth   Auth   @relation(fields: [authId], references: [authId])
+}
+
+model Notification {
+  notificationId String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authId         String @db.Uuid
+  auth           Auth   @relation(fields: [authId], references: [authId])
+}
+
+model Customer {
+  customerId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+model Employeeinfo {
+  infoId     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String   @unique @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+
+enum LeaveType {
+  annual
+  sick
+  maternity
+  paternity
+  unpaid
+  other
+}
+
+enum LeaveStatus {
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum CheckStatus {
+  checkin
+  checkout
+  absent
+}
+
+enum ScanMethod {
+  phone
+  biometric
+}
+
+enum Status {
+  active
+  inactive
+  deleted
+}
+
+enum AccountStatus {
+  active
+  inactive
+  suspended
+  deleted
+}
+
+enum Gender {
+  male
+  female
+  other
+}
