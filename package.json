@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx prisma migrate dev --name mod-notification",
+    "migrate": "npx prisma migrate dev --name mod-notification2",
     "generate": "npx prisma generate",
     "pull": "npx prisma db pull",
     "push": "npx prisma db push",

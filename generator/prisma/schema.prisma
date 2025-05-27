@@ -167,6 +167,8 @@ model Notification {
   notificationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   message        String?
   title          String?
+  read           Boolean  @default(false)
+  type           String?
   createdAt      DateTime @default(now())
   authId         String   @db.Uuid
   auth           Auth     @relation(fields: [authId], references: [authId])
