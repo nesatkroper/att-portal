@@ -17,7 +17,7 @@ model Attendance {
   status       Status      @default(active)
   checkIn      DateTime    @default(now())
   checkOut     DateTime?
-  note         String?     @db.Text
+  note         String?
   createdAt    DateTime    @default(now())
   employee     Employee    @relation(fields: [employeeId], references: [employeeId])
   event        Event       @relation(fields: [eventId], references: [eventId])
@@ -36,11 +36,11 @@ model Auth {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   lastLoginAt  DateTime?
-  token        Token[]
+  employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
+  role         Role           @relation(fields: [roleId], references: [roleId])
   logs         AuthLog[]
   notification Notification[]
-  role         Role           @relation(fields: [roleId], references: [roleId])
-  employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
+  token        Token[]
 
   @@index([email])
   @@index([status])
@@ -55,8 +55,8 @@ model Employee {
   gender         Gender         @default(male)
   dob            DateTime?
   phone          String?        @unique @db.VarChar(20)
-  positionId     String         @db.Uuid
-  departmentId   String         @db.Uuid
+  position       String?
+  department     String?
   salary         Decimal        @db.Decimal(10, 2)
   hiredDate      DateTime?
   status         Status         @default(active)
@@ -66,21 +66,17 @@ model Employee {
   attendances    Attendance[]
   auth           Auth?
   customer       Customer[]
-  department     Department     @relation(fields: [departmentId], references: [departmentId])
-  position       Position       @relation(fields: [positionId], references: [positionId])
   info           Employeeinfo?
   approvedLeaves LeaveRequest[] @relation("Approver")
   leaveRequests  LeaveRequest[] @relation("Requester")
 
   @@index([employeeCode])
-  @@index([departmentId])
-  @@index([positionId])
 }
 
 model Event {
   eventId    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   eventName  String       @db.VarChar(200)
-  memo       String?      @db.Text
+  memo       String?
   startDate  DateTime
   endDate    DateTime
   status     Status       @default(active)
@@ -92,10 +88,8 @@ model Event {
 }
 
 model QRCode {
-  qrId       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   token      String   @unique
   eventId    String   @db.Uuid
-  event      Event    @relation(fields: [eventId], references: [eventId])
   eventName  String
   qrCode     String
   expiresAt  DateTime
@@ -104,6 +98,8 @@ model QRCode {
   scans      Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  qrId       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event      Event    @relation(fields: [eventId], references: [eventId])
 
   @@index([eventId])
 }
@@ -114,7 +110,7 @@ model LeaveRequest {
   leaveType    LeaveType
   startDate    DateTime
   endDate      DateTime
-  reason       String?     @db.Text
+  reason       String?
   status       LeaveStatus @default(pending)
   approvedById String?     @db.Uuid
   approvedAt   DateTime?
@@ -133,26 +129,6 @@ model Role {
   auths    Auth[]
 }
 
-model Department {
-  departmentId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  departmentName String     @unique @db.VarChar(100)
-  description    String?    @db.Text
-  status         Status     @default(active)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  employees      Employee[]
-}
-
-model Position {
-  positionId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  positionName String     @unique @db.VarChar(100)
-  description  String?    @db.Text
-  status       Status     @default(active)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  employees    Employee[]
-}
-
 model Address {
   addressId  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   street     String?   @db.VarChar(255)
@@ -167,21 +143,33 @@ model Address {
 }
 
 model Token {
-  tokenId String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authId  String @db.Uuid
-  auth    Auth   @relation(fields: [authId], references: [authId])
+  tokenId String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token   String    @unique @db.VarChar(255)
+  expires DateTime?
+  authId  String    @db.Uuid
+  auth    Auth      @relation(fields: [authId], references: [authId])
 }
 
 model AuthLog {
-  logId  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authId String @db.Uuid
-  auth   Auth   @relation(fields: [authId], references: [authId])
+  logId     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  action    String?
+  metadata  String?
+  ip        String?
+  userAgent String?
+  message   String?
+  method    String?
+  authId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  auth      Auth     @relation(fields: [authId], references: [authId])
 }
 
 model Notification {
-  notificationId String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authId         String @db.Uuid
-  auth           Auth   @relation(fields: [authId], references: [authId])
+  notificationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message        String?
+  title          String?
+  createdAt      DateTime @default(now())
+  authId         String   @db.Uuid
+  auth           Auth     @relation(fields: [authId], references: [authId])
 }
 
 model Customer {

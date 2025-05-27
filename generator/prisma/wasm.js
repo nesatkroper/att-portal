@@ -153,8 +153,8 @@ exports.Prisma.EmployeeScalarFieldEnum = {
   gender: 'gender',
   dob: 'dob',
   phone: 'phone',
-  positionId: 'positionId',
-  departmentId: 'departmentId',
+  position: 'position',
+  department: 'department',
   salary: 'salary',
   hiredDate: 'hiredDate',
   status: 'status',
@@ -174,7 +174,6 @@ exports.Prisma.EventScalarFieldEnum = {
 };
 
 exports.Prisma.QRCodeScalarFieldEnum = {
-  qrId: 'qrId',
   token: 'token',
   eventId: 'eventId',
   eventName: 'eventName',
@@ -184,7 +183,8 @@ exports.Prisma.QRCodeScalarFieldEnum = {
   isActive: 'isActive',
   scans: 'scans',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  qrId: 'qrId'
 };
 
 exports.Prisma.LeaveRequestScalarFieldEnum = {
@@ -206,24 +206,6 @@ exports.Prisma.RoleScalarFieldEnum = {
   roleName: 'roleName'
 };
 
-exports.Prisma.DepartmentScalarFieldEnum = {
-  departmentId: 'departmentId',
-  departmentName: 'departmentName',
-  description: 'description',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PositionScalarFieldEnum = {
-  positionId: 'positionId',
-  positionName: 'positionName',
-  description: 'description',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.AddressScalarFieldEnum = {
   addressId: 'addressId',
   street: 'street',
@@ -237,16 +219,28 @@ exports.Prisma.AddressScalarFieldEnum = {
 
 exports.Prisma.TokenScalarFieldEnum = {
   tokenId: 'tokenId',
+  token: 'token',
+  expires: 'expires',
   authId: 'authId'
 };
 
 exports.Prisma.AuthLogScalarFieldEnum = {
   logId: 'logId',
-  authId: 'authId'
+  action: 'action',
+  metadata: 'metadata',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  message: 'message',
+  method: 'method',
+  authId: 'authId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.NotificationScalarFieldEnum = {
   notificationId: 'notificationId',
+  message: 'message',
+  title: 'title',
+  createdAt: 'createdAt',
   authId: 'authId'
 };
 
@@ -322,8 +316,6 @@ exports.Prisma.ModelName = {
   QRCode: 'QRCode',
   LeaveRequest: 'LeaveRequest',
   Role: 'Role',
-  Department: 'Department',
-  Position: 'Position',
   Address: 'Address',
   Token: 'Token',
   AuthLog: 'AuthLog',

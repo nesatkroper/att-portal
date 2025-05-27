@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx prisma migrate dev --name mod-qr",
+    "migrate": "npx prisma migrate dev --name mod-notification",
     "generate": "npx prisma generate",
     "pull": "npx prisma db pull",
     "push": "npx prisma db push",
@@ -45,6 +45,7 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
     "autoprefixer": "^10.4.20",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -52,6 +53,7 @@
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
     "input-otp": "1.4.1",
+    "jsonwebtoken": "^9.0.2",
     "jspdf": "latest",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.454.0",
@@ -73,6 +75,8 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
