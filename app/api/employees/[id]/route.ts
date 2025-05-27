@@ -25,8 +25,6 @@ export async function GET(
     const employee = await prisma.employee.findUnique({
       where: { employeeId: id },
       include: {
-        department: true,
-        position: true,
         auth: true,
       },
     });
@@ -41,8 +39,8 @@ export async function GET(
     return NextResponse.json({
       employee: {
         ...employee,
-        department: employee.department?.departmentName,
-        position: employee.position?.positionName,
+        department: employee.department,
+        position: employee.position,
       },
     });
   } catch (error) {
@@ -76,18 +74,18 @@ export async function PUT(
     }
 
     // Check if email is being updated to an existing one
-    if (validatedData.email && validatedData.email !== existingEmployee.email) {
-      const emailExists = await prisma.employee.findFirst({
-        where: { email: validatedData.email },
-      });
+    // if (validatedData.email && validatedData.email !== existingEmployee.email) {
+    //   const emailExists = await prisma.employee.findFirst({
+    //     where: { email: validatedData.email },
+    //   });
 
-      if (emailExists) {
-        return NextResponse.json(
-          { error: "Email already in use" },
-          { status: 400 }
-        );
-      }
-    }
+    //   if (emailExists) {
+    //     return NextResponse.json(
+    //       { error: "Email already in use" },
+    //       { status: 400 }
+    //     );
+    //   }
+    // }
 
     // Prepare update data
     const updateData: any = { ...validatedData };
@@ -99,10 +97,6 @@ export async function PUT(
     const updatedEmployee = await prisma.employee.update({
       where: { employeeId: id },
       data: updateData,
-      include: {
-        department: true,
-        position: true,
-      },
     });
 
     // If email was updated, also update the auth record
@@ -117,8 +111,8 @@ export async function PUT(
       success: true,
       employee: {
         ...updatedEmployee,
-        department: updatedEmployee.department?.departmentName,
-        position: updatedEmployee.position?.positionName,
+        department: updatedEmployee.department,
+        position: updatedEmployee.position,
       },
     });
   } catch (error) {
@@ -176,8 +170,6 @@ export async function DELETE(
     );
   }
 }
-
-
 
 // import { type NextRequest, NextResponse } from "next/server"
 // import { runtimeData } from "@/lib/mock-data"

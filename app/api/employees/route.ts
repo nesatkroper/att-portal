@@ -7,8 +7,8 @@ const employeeCreateSchema = z.object({
   lastName: z.string().min(1).max(20),
   email: z.string().email(),
   phone: z.string().min(1).max(20),
-  departmentId: z.string().uuid(),
-  positionId: z.string().uuid(),
+  departmentId: z.string(),
+  positionId: z.string(),
   salary: z.number().positive(),
   gender: z.enum(["male", "female", "other"]).optional().default("male"),
   dob: z.string().optional(), // or z.date() if you prefer
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      employees: employees.map(emp => ({
+      employees: employees.map((emp) => ({
         ...emp,
         department: emp.department,
         position: emp.position,
@@ -80,16 +80,16 @@ export async function POST(request: NextRequest) {
     const validatedData = employeeCreateSchema.parse(body);
 
     // Check if email already exists
-    const existingEmployee = await prisma.employee.findFirst({
-      where: { email: validatedData.email },
-    });
+    // const existingEmployee = await prisma.employee.findFirst({
+    //   where: { email: validatedData.email },
+    // });
 
-    if (existingEmployee) {
-      return NextResponse.json(
-        { error: "Email already exists" },
-        { status: 400 }
-      );
-    }
+    // if (existingEmployee) {
+    //   return NextResponse.json(
+    //     { error: "Email already exists" },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Generate employee code
     const lastEmployee = await prisma.employee.findFirst({
@@ -107,20 +107,15 @@ export async function POST(request: NextRequest) {
       data: {
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
-        email: validatedData.email,
         phone: validatedData.phone,
-        departmentId: validatedData.departmentId,
-        positionId: validatedData.positionId,
+        department: validatedData.departmentId,
+        position: validatedData.positionId,
         salary: validatedData.salary,
         gender: validatedData.gender,
         dob: validatedData.dob ? new Date(validatedData.dob) : null,
         employeeCode,
         hiredDate: new Date(),
         status: "active",
-      },
-      include: {
-        department: true,
-        position: true,
       },
     });
 
@@ -139,8 +134,8 @@ export async function POST(request: NextRequest) {
       success: true,
       employee: {
         ...newEmployee,
-        department: newEmployee.department?.departmentName,
-        position: newEmployee.position?.positionName,
+        department: newEmployee.department,
+        position: newEmployee.position,
       },
     });
   } catch (error) {
@@ -157,9 +152,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-
-
 
 // import { type NextRequest, NextResponse } from "next/server"
 // import { runtimeData } from "@/lib/mock-data"
