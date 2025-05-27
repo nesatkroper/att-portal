@@ -30,28 +30,10 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { downloadQRCode } from "@/lib/qr-generator";
-
-interface QRCodeData {
-  id: string;
-  eventId: string;
-  eventName: string;
-  qrCode: string;
-  expiresAt: string;
-  isActive: boolean;
-  scans: number;
-  createdAt: string;
-  token: string;
-  oneTimeUse: boolean;
-}
-
-interface Event {
-  eventId: string;
-  eventName: string;
-  status: string;
-}
+import { Event, QRCode } from "@/generator/prisma";
 
 export default function QRCodePage() {
-  const [qrCodes, setQrCodes] = useState<QRCodeData[]>([]);
+  const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -141,53 +123,8 @@ export default function QRCodePage() {
     }
   };
 
-  // const generateQRCode = async () => {
-  //   if (!newQR.eventId) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Please select an event",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-
-  //   setIsGenerating(true);
-  //   try {
-  //     const response = await fetch("/api/qr/generate", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         eventId: newQR.eventId,
-  //         expiresIn: Number.parseInt(newQR.expiresIn),
-  //         oneTimeUse: newQR.oneTimeUse,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (data.success) {
-  //       setQrCodes((prev) => [data.qrCode, ...prev]);
-  //       setNewQR({ eventId: "", expiresIn: "60", oneTimeUse: false });
-  //       toast({
-  //         title: "Success",
-  //         description: "QR code generated successfully",
-  //       });
-  //     } else {
-  //       throw new Error(data.error);
-  //     }
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to generate QR code",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-  // };
-
-  const handleDownload = (qrCode: QRCodeData) => {
-    downloadQRCode(qrCode.qrCode, `qr-${qrCode.eventName}-${qrCode.id}`);
+  const handleDownload = (qrCode: QRCode) => {
+    downloadQRCode(qrCode.qrCode, `qr-${qrCode.eventName}-${qrCode.qrId}`);
     toast({
       title: "Success",
       description: "QR code downloaded successfully",
@@ -195,18 +132,18 @@ export default function QRCodePage() {
   };
 
   const deleteQRCode = (id: string) => {
-    setQrCodes((prev) => prev.filter((qr) => qr.id !== id));
+    setQrCodes((prev) => prev.filter((qr) => qr.qrId !== id));
     toast({
       title: "Success",
       description: "QR code deleted successfully",
     });
   };
 
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString: Date) => {
     return new Date(dateString).toLocaleString();
   };
 
-  const isExpired = (expiresAt: string) => {
+  const isExpired = (expiresAt: Date) => {
     return new Date(expiresAt) < new Date();
   };
 
@@ -363,7 +300,7 @@ export default function QRCodePage() {
 
       <div className='grid gap-4 md:grid-cols-3'>
         {qrCodes.map((qrCode) => (
-          <Card key={qrCode.id} className='relative'>
+          <Card key={qrCode.qrId} className='relative'>
             <CardHeader>
               <div className='flex items-center justify-between'>
                 <CardTitle className='text-lg'>{qrCode.eventName}</CardTitle>
@@ -429,7 +366,7 @@ export default function QRCodePage() {
                 <Button
                   variant='outline'
                   size='sm'
-                  onClick={() => deleteQRCode(qrCode.id)}
+                  onClick={() => deleteQRCode(qrCode.qrId)}
                   className='text-red-500 hover:text-red-700'>
                   <Trash2 className='h-4 w-4' />
                 </Button>

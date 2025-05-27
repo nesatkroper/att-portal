@@ -342,7 +342,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {summary.averageWorkHours.toFixed(1)}h
+                {summary.averageWorkHours}h
               </div>
               <p className='text-xs text-muted-foreground'>
                 Per completed session

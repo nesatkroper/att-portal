@@ -320,7 +320,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\Personal Project\\attendance\\att-portal\\generator\\prisma",
+      "value": "/home/user/att-portal/generator/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -329,12 +329,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "debian-openssl-1.1.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\Personal Project\\attendance\\att-portal\\prisma\\schema.prisma",
+    "sourceFilePath": "/home/user/att-portal/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -17,7 +17,7 @@ model Attendance {
   status       Status      @default(active)
   checkIn      DateTime    @default(now())
   checkOut     DateTime?
-  note         String?     @db.Text
+  note         String?
   createdAt    DateTime    @default(now())
   employee     Employee    @relation(fields: [employeeId], references: [employeeId])
   event        Event       @relation(fields: [eventId], references: [eventId])
@@ -36,11 +36,11 @@ model Auth {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   lastLoginAt  DateTime?
-  token        Token[]
+  employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
+  role         Role           @relation(fields: [roleId], references: [roleId])
   logs         AuthLog[]
   notification Notification[]
-  role         Role           @relation(fields: [roleId], references: [roleId])
-  employee     Employee?      @relation(fields: [employeeId], references: [employeeId])
+  token        Token[]
 
   @@index([email])
   @@index([status])
@@ -80,7 +80,7 @@ model Employee {
 model Event {
   eventId    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   eventName  String       @db.VarChar(200)
-  memo       String?      @db.Text
+  memo       String?
   startDate  DateTime
   endDate    DateTime
   status     Status       @default(active)
@@ -92,18 +92,18 @@ model Event {
 }
 
 model QRCode {
-  qrId        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  token       String   @unique
-  eventId     String   @db.Uuid
-  event       Event    @relation(fields: [eventId], references: [eventId])
-  eventName   String
-  qrCode      String
-  expiresAt   DateTime
-  oneTimeUse  Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  scans       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  token      String   @unique
+  eventId    String   @db.Uuid
+  eventName  String
+  qrCode     String
+  expiresAt  DateTime
+  oneTimeUse Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  scans      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  qrId       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event      Event    @relation(fields: [eventId], references: [eventId])
 
   @@index([eventId])
 }
@@ -114,7 +114,7 @@ model LeaveRequest {
   leaveType    LeaveType
   startDate    DateTime
   endDate      DateTime
-  reason       String?     @db.Text
+  reason       String?
   status       LeaveStatus @default(pending)
   approvedById String?     @db.Uuid
   approvedAt   DateTime?
@@ -127,7 +127,6 @@ model LeaveRequest {
   @@index([status])
 }
 
-
 model Role {
   roleId   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   roleName String @unique @db.VarChar(50)
@@ -137,7 +136,7 @@ model Role {
 model Department {
   departmentId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   departmentName String     @unique @db.VarChar(100)
-  description    String?    @db.Text
+  description    String?
   status         Status     @default(active)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -147,7 +146,7 @@ model Department {
 model Position {
   positionId   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   positionName String     @unique @db.VarChar(100)
-  description  String?    @db.Text
+  description  String?
   status       Status     @default(active)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -196,7 +195,6 @@ model Employeeinfo {
   employeeId String   @unique @db.Uuid
   employee   Employee @relation(fields: [employeeId], references: [employeeId])
 }
-
 
 enum LeaveType {
   annual
